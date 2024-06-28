@@ -1,4 +1,3 @@
-import argparse
 import os
 import re
 import shutil
@@ -380,7 +379,7 @@ def set_needs_priority_status_on_high_engagement_issues(new_comment_interval_day
         issue_number = issue["number"]
         if issue_has_new_comment(
             issue, new_comment_interval_days, headers
-        ) or not prioritized_recently(issue_number, headers):
+        ) and not prioritized_recently(issue_number, headers):
             # Issue id is a globally unique identifier
             issue_id = get_issue_id(issue_number, headers)
             project_item_id = get_project_item_id(issue_id, headers)
@@ -396,12 +395,5 @@ def set_needs_priority_status_on_high_engagement_issues(new_comment_interval_day
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--new_comment_interval_days",
-        type=int,
-        default=1,
-        help="Interval in days to check for new comments",
-    )
-    args = parser.parse_args()
-    set_needs_priority_status_on_high_engagement_issues(args.new_comment_interval_days)
+    new_comment_interval_days = int(os.getenv("NEW_COMMENT_INTERVAL_DAYS", 1))
+    set_needs_priority_status_on_high_engagement_issues(new_comment_interval_days)
