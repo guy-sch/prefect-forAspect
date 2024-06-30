@@ -333,6 +333,9 @@ class Task(Generic[P, R]):
             except TypeError:
                 file = "unknown"
                 line_number = "unknown"
+            except OSError:
+                file = inspect.getsourcefile(self.fn)
+                line_number = "unknown"
 
             warnings.warn(
                 f"A task named {self.name!r} and defined at '{file}:{line_number}' "

@@ -333,13 +333,17 @@ class Flow(Generic[P, R]):
             if other.name == self.name and id(other.fn) != id(self.fn)
         ):
             file = inspect.getsourcefile(self.fn)
+            line_number = 0
+        try:
             line_number = inspect.getsourcelines(self.fn)[1]
-            warnings.warn(
-                f"A flow named {self.name!r} and defined at '{file}:{line_number}' "
-                "conflicts with another flow. Consider specifying a unique `name` "
-                "parameter in the flow definition:\n\n "
-                "`@flow(name='my_unique_name', ...)`"
-            )
+        except OSError:
+            file_phrase = f"{file}:{line_number}"
+        warnings.warn(
+            f"A flow named {self.name!r} and defined at '{file_phrase}' "
+            "conflicts with another flow. Consider specifying a unique `name` "
+            "parameter in the flow definition:\n\n "
+            "`@flow(name='my_unique_name', ...)`"
+        )
         self.on_completion = on_completion
         self.on_failure = on_failure
         self.on_cancellation = on_cancellation
