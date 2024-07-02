@@ -154,20 +154,24 @@ def register_type(cls: T) -> T:
     existing_value = registry.get(key)
     if existing_value is not None and id(existing_value) != id(cls):
         # Get line numbers for debugging
-        file = inspect.getsourcefile(cls)
-        existing_file = inspect.getsourcefile(existing_value)
         line_number = 0
         existing_line_number = 0
         try:
+            file = inspect.getsourcefile(cls)
             line_number = inspect.getsourcelines(cls)[1]
+            existing_file = inspect.getsourcefile(existing_value)
             existing_line_number = inspect.getsourcelines(existing_value)[1]
         except OSError:
-            new_file_phrase = f"{file}:{line_number}"
-            existing_file_phrase = f"{existing_file}:{existing_line_number}"
+            warnings.warn("Can't read files content, due to obfuscated file.")
+            file = inspect.getsourcefile(cls)
+            existing_file = inspect.getsourcefile(existing_value)
+            line_number = "unknown"
+            existing_line_number = "unknown"
+            
         warnings.warn(
-            f"Type {cls.__name__!r} at {new_file_phrase} has key {key!r} that "
+            f"Type {cls.__name__!r} at {file}:{line_number} has key {key!r} that "
             f"matches existing registered type {existing_value.__name__!r} from "
-            f"{existing_file_phrase}. The existing type will be "
+            f"{existing_file}:{existing_line_number}. The existing type will be "
             "overridden."
         )
 

@@ -332,18 +332,20 @@ class Flow(Generic[P, R]):
             for other in registry.get_instances(Flow)
             if other.name == self.name and id(other.fn) != id(self.fn)
         ):
-            file = inspect.getsourcefile(self.fn)
-            line_number = 0
-        try:
-            line_number = inspect.getsourcelines(self.fn)[1]
-        except OSError:
-            file_phrase = f"{file}:{line_number}"
-        warnings.warn(
-            f"A flow named {self.name!r} and defined at '{file_phrase}' "
-            "conflicts with another flow. Consider specifying a unique `name` "
-            "parameter in the flow definition:\n\n "
-            "`@flow(name='my_unique_name', ...)`"
-        )
+            try:
+                file = inspect.getsourcefile(self.fn)
+                line_number = inspect.getsourcelines(self.fn)[1]
+            except OSError:
+                warnings.warn("Can't read files content, due to obfuscated file.")
+                file = inspect.getsourcefile(self.fn)
+                line_number = "unknown"
+            
+            warnings.warn(
+                f"A flow named {self.name!r} and defined at '{file}:{line_number}' "
+                "conflicts with another flow. Consider specifying a unique `name` "
+                "parameter in the flow definition:\n\n "
+                "`@flow(name='my_unique_name', ...)`"
+            )
         self.on_completion = on_completion
         self.on_failure = on_failure
         self.on_cancellation = on_cancellation
